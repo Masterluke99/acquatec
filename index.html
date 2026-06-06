@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Acqua TEC Análises</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:#f5f7f8;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    padding:20px;
+}
+
+.card{
+    background:white;
+    max-width:600px;
+    width:100%;
+    padding:40px;
+    border-radius:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,.08);
+    text-align:center;
+}
+
+.logo{
+    width:120px;
+    margin-bottom:20px;
+}
+
+h1{
+    color:#008b8b;
+    margin-bottom:10px;
+}
+
+.status{
+    display:inline-block;
+    padding:10px 20px;
+    border-radius:30px;
+    background:#dff7ea;
+    color:#0f8b4c;
+    font-weight:bold;
+    margin:20px 0;
+}
+
+.info{
+    margin:10px 0;
+    color:#555;
+    font-size:17px;
+}
+
+.btn{
+    display:inline-block;
+    margin-top:25px;
+    background:#008b8b;
+    color:white;
+    text-decoration:none;
+    padding:15px 30px;
+    border-radius:10px;
+    font-weight:bold;
+    transition:.3s;
+}
+
+.btn:hover{
+    background:#006d6d;
+}
+
+footer{
+    margin-top:25px;
+    color:#777;
+    font-size:13px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+    <!-- Trocar pelo logo da Acqua TEC -->
+    <img src="logo.png" alt="Acqua TEC" class="logo">
+
+    <h1>Acqua TEC Análises</h1>
+
+    <p class="info">
+        Monitoramento Técnico da Qualidade da Água
+    </p>
+
+    <h2>Condomínio Residencial Alfa</h2>
+
+    <div class="status">
+        ✓ Água Monitorada
+    </div>
+
+    <p class="info">
+        Última análise: <strong>06/06/2026</strong>
+    </p>
+
+    <p class="info">
+        Próxima coleta: <strong>13/06/2026</strong>
+    </p>
+
+    <a href="relatorio.pdf" class="btn" target="_blank">
+        Visualizar Relatório
+    </a>
+
+    <footer>
+        Acqua TEC Análises • Controle e Monitoramento da Qualidade da Água
+    </footer>
+
+</div>
+
+</body>
+</html>
