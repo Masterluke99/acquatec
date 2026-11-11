@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Acqua TEC - Gerador de Laudos</title>
+    <!-- Bibliotecas executadas direto pelo Chrome (Sem instalações complexas) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <link rel="icon" href="logo.png" type="image/png">
+    <style>
+
+    :root {
+        --navy: #202a30;
+        --graphite: #303b42;
+        --graphite-2: #3b474e;
+        --cyan: #08b9c5;
+        --cyan-dark: #078b98;
+        --aqua-soft: #e8f8f8;
+        --ink: #26343a;
+        --muted: #718087;
+        --line: #dce5e7;
+        --surface: #ffffff;
+        --page: #edf2f3;
+        --success-bg: #e8f7ef;
+        --success: #176b43;
+        --error-bg: #fff0ef;
+        --error: #a73535;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        margin: 0;
+        padding: 36px 20px 48px;
+        color: var(--ink);
+        background:
+            radial-gradient(circle at 90% 0%, rgba(8,185,197,.12), transparent 28rem),
+            linear-gradient(145deg, #e9eff0 0%, #f5f8f8 55%, #e9eff0 100%);
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+        min-height: 100vh;
+    }
+
+    .container {
+        width: min(100%, 980px);
+        margin: 0 auto;
+        background: var(--surface);
+        border: 1px solid rgba(32,42,48,.08);
+        border-radius: 22px;
+        overflow: hidden;
+        box-shadow: 0 22px 65px rgba(28,48,55,.12);
+    }
+
+    .brand-bar {
+        min-height: 9px;
+        background: linear-gradient(90deg, #0799a7, #14d0d0 55%, #078b98);
+    }
+
+    .page-header {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+        padding: 30px 38px 26px;
+        background: linear-gradient(120deg, #27343b, #35434a);
+        color: #fff;
+    }
+
+    .logo {
+        width: 104px;
+        height: 104px;
+        object-fit: contain;
+        padding: .1px;
+        border-radius: 16px;
+        background: #fff;
+        flex: 0 0 auto;
+    }
+
+    .heading-copy { min-width: 0; }
+    .eyebrow {
+        margin: 0 0 7px;
+        color: #67e2e2;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .2em;
+        text-transform: uppercase;
+    }
+
+    h1 {
+        margin: 0;
+        color: #fff;
+        font-size: clamp(23px, 4vw, 32px);
+        line-height: 1.15;
+        letter-spacing: -.035em;
+    }
+
+    h3 {
+        margin: 9px 0 0;
+        color: #d0dadd;
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 1.5;
+    }
+
+    .content { padding: 30px 38px 36px; }
+
+    .section-heading {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 17px;
+        color: var(--navy);
+        font-size: 16px;
+        font-weight: 750;
+    }
+
+    .section-heading::before {
+        content: "";
+        width: 4px;
+        height: 20px;
+        border-radius: 5px;
+        background: var(--cyan);
+    }
+
+    .upload-section {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+        margin-bottom: 28px;
+    }
+
+    .field-group {
+        position: relative;
+        padding: 22px;
+        border: 1px solid #d7e5e7;
+        border-radius: 15px;
+        background: linear-gradient(145deg, #fbfefe, #f2f9f9);
+        transition: border-color .2s, transform .2s, box-shadow .2s;
+    }
+
+    .field-group:hover {
+        border-color: var(--cyan);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(8,139,152,.08);
+    }
+
+    .step {
+        display: inline-grid;
+        place-items: center;
+        width: 27px;
+        height: 27px;
+        margin-bottom: 13px;
+        border-radius: 9px;
+        background: var(--aqua-soft);
+        color: var(--cyan-dark);
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 7px;
+        color: var(--navy);
+        font-size: 14px;
+        font-weight: 750;
+    }
+
+    .field-hint {
+        margin: 0 0 15px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.5;
+    }
+
+    input[type="file"] {
+        display: block;
+        width: 100%;
+        padding: 11px;
+        border: 1px dashed #9bcdd0;
+        border-radius: 10px;
+        background: #fff;
+        color: #52636a;
+        font: inherit;
+        font-size: 12px;
+        cursor: pointer;
+    }
+
+    input[type="file"]::file-selector-button {
+        margin-right: 10px;
+        padding: 8px 11px;
+        border: 0;
+        border-radius: 7px;
+        background: var(--graphite);
+        color: #fff;
+        font-weight: 650;
+        cursor: pointer;
+    }
+
+    .conferencia-section {
+        display: none;
+        margin-top: 30px;
+        padding-top: 26px;
+        border-top: 1px solid var(--line);
+    }
+
+    .section-description {
+        margin: -5px 0 17px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.6;
+    }
+
+    .table-wrap {
+        width: 100%;
+        overflow-x: auto;
+        border: 1px solid var(--line);
+        border-radius: 13px;
+    }
+
+    table {
+        width: 100%;
+        min-width: 620px;
+        margin: 0;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    th, td {
+        padding: 13px 14px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    th {
+        background: #edf8f8;
+        color: #176b75;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+    }
+
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: #f8fcfc; }
+    td:first-child { width: 55px; color: var(--muted); }
+
+    select {
+        width: 100%;
+        min-width: 220px;
+        padding: 10px 12px;
+        border: 1px solid #cfdddf;
+        border-radius: 8px;
+        background: #fff;
+        color: var(--ink);
+        font: inherit;
+        outline: none;
+    }
+
+    select:focus, input:focus {
+        border-color: var(--cyan);
+        box-shadow: 0 0 0 3px rgba(8,185,197,.12);
+    }
+
+    button {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        margin-top: 20px;
+        padding: 15px 20px;
+        border: 0;
+        border-radius: 11px;
+        background: linear-gradient(100deg, #0799a7, #08bdc5);
+        color: #fff;
+        font-size: 14px;
+        font-weight: 800;
+        letter-spacing: .01em;
+        cursor: pointer;
+        box-shadow: 0 8px 18px rgba(8,155,166,.2);
+        transition: transform .2s, box-shadow .2s, filter .2s;
+    }
+
+    button:hover {
+        transform: translateY(-1px);
+        filter: saturate(1.08);
+        box-shadow: 0 11px 23px rgba(8,155,166,.27);
+    }
+
+    button:active { transform: translateY(0); }
+
+    .status {
+        display: none;
+        margin-top: 20px;
+        padding: 14px 16px;
+        border-radius: 10px;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 700;
+        line-height: 1.5;
+    }
+
+    .success { display: block; background: var(--success-bg); color: var(--success); }
+    .error { display: block; background: var(--error-bg); color: var(--error); }
+
+    .footer-note {
+        padding: 15px 38px;
+        border-top: 1px solid #e8eeee;
+        background: #f8fbfb;
+        color: #819095;
+        text-align: center;
+        font-size: 11px;
+        letter-spacing: .03em;
+    }
+
+    @media (max-width: 680px) {
+        body { padding: 14px 10px 28px; }
+        .container { border-radius: 16px; }
+        .page-header { padding: 23px 20px; gap: 15px; }
+        .logo { width: 100px; height: 100px; padding: 5px; border-radius: 12px; }
+        .content { padding: 24px 18px 28px; }
+        .upload-section { grid-template-columns: 1fr; }
+        .field-group { padding: 18px; }
+        .footer-note { padding: 14px 18px; }
+    }
+
+    @media (max-width: 390px) {
+        .page-header { align-items: flex-start; flex-direction: column; }
+        .logo { width: 100px; height: 100px; }
+    }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="brand-bar"></div>
+    <header class="page-header">
+        <img src="logo.png" alt="Acqua TEC Análises" class="logo">
+        <div class="heading-copy">
+            <p class="eyebrow">Acqua TEC Análises</p>
+            <h1>Gerador de Laudos</h1>
+            <h3>Mapeamento e conferência automatizada de dados técnicos</h3>
+        </div>
+    </header>
+
+    <main class="content">
+        <h2 class="section-heading">Importação dos arquivos</h2>
+        <div class="upload-section">
+            <section class="field-group">
+                <span class="step">01</span>
+                <label for="cadastroFile">Cadastro de clientes</label>
+                <p class="field-hint">Selecione a planilha fixa com nomes, endereços e demais dados cadastrais.</p>
+                <input type="file" id="cadastroFile" accept=".csv" onchange="lerCadastro()">
+            </section>
+
+            <section class="field-group">
+                <span class="step">02</span>
+                <label for="medicoesFile">Medições da semana</label>
+                <p class="field-hint">Selecione o arquivo CSV com os resultados e registros das coletas.</p>
+                <input type="file" id="medicoesFile" accept=".csv" onchange="lerMedicoes()">
+            </section>
+        </div>
+
+        <div id="conferenciaSection" class="conferencia-section">
+            <h2 class="section-heading">Conferência dos vínculos</h2>
+            <p class="section-description">Confira a associação entre os nomes da planilha de medições e o cadastro completo. Se necessário, ajuste o condomínio correspondente antes de gerar os documentos.</p>
+            <div class="table-wrap">
+                <table id="tabelaConferencia">
+                    <thead>
+                        <tr>
+                            <th>Linha</th>
+                            <th>Nome na medição</th>
+                            <th>Vincular ao cadastro completo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpoConferencia"></tbody>
+                </table>
+            </div>
+            <button onclick="processarEGerarLaudos()">Gerar e baixar pacote de laudos <span aria-hidden="true">→</span></button>
+        </div>
+
+        <div id="statusBox" class="status" role="status" aria-live="polite"></div>
+    </main>
+
+    <footer class="footer-note">ACQUA TEC ANÁLISES · CONTROLE TÉCNICO E QUALIDADE DA ÁGUA</footer>
+</div>
+
+<script>
+    let dadosCadastro = [];
+    let dadosMedicoes = [];
+
+    // Função para converter o texto do CSV em Array de Objetos tratando aspas e espaços
+    function csvToObjects(text) {
+        const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+        if (lines.length === 0) return [];
+        
+        const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
+        const result = [];
+        
+        for (let i = 1; i < lines.length; i++) {
+            const obj = {};
+            const currentline = lines[i].split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+            
+            if (currentline.length < headers.length) continue;
+            
+            headers.forEach((header, index) => {
+                obj[header] = currentline[index];
+            });
+            result.push(obj);
+        }
+        return result;
+    }
+
+    function lerCadastro() {
+        const fileInput = document.getElementById('cadastroFile');
+        if (!fileInput.files[0]) return;
+
+        const reader = new FileReader();
+        reader.readAsText(fileInput.files[0], "UTF-8");
+        reader.onload = function (e) {
+            dadosCadastro = csvToObjects(e.target.result);
+            atualizarTabelaConferencia();
+        };
+    }
+
+    function lerMedicoes() {
+        const fileInput = document.getElementById('medicoesFile');
+        if (!fileInput.files[0]) return;
+
+        const reader = new FileReader();
+        reader.readAsText(fileInput.files[0], "UTF-8");
+        reader.onload = function (e) {
+            dadosMedicoes = csvToObjects(e.target.result);
+            atualizarTabelaConferencia();
+        };
+    }
+
+    // Tenta achar o melhor casamento de nomes compostos ou parciais
+    function encontrarMelhorMatch(nomeSemanal, listaCadastro) {
+        const nomeNorm = nomeSemanal.toLowerCase().trim();
+        
+        // 1. Tenta correspondência exata
+        let match = listaCadastro.find(c => c.Cliente.toLowerCase().trim() === nomeNorm);
+        if (match) return match.Cliente;
+
+        // 2. Tenta ver se um nome está contido no outro (nomes compostos)
+        match = listaCadastro.find(c => {
+            const cNorm = c.Cliente.toLowerCase().trim();
+            return nomeNorm.includes(cNorm) || cNorm.includes(nomeNorm);
+        });
+        
+        return match ? match.Cliente : "";
+    }
+
+    function atualizarTabelaConferencia() {
+        if (dadosCadastro.length === 0 || dadosMedicoes.length === 0) return;
+
+        const corpo = document.getElementById('corpoConferencia');
+        corpo.innerHTML = "";
+        
+        dadosMedicoes.forEach((row, index) => {
+            const tr = document.createElement('tr');
+            
+            const tdIndex = document.createElement('td');
+            tdIndex.innerText = index + 1;
+            
+            const tdNomeSemanal = document.createElement('td');
+            tdNomeSemanal.innerText = row['Cliente'] || "Não informado";
+            tdNomeSemanal.style.fontWeight = "bold";
+
+            const tdSelect = document.createElement('td');
+            const select = document.createElement('select');
+            select.id = `select_cliente_${index}`;
+
+            // Opção vazia padrão
+            const optDefault = document.createElement('option');
+            optDefault.value = "";
+            optDefault.innerText = "-- Selecione o cadastro correspondente --";
+            select.appendChild(optDefault);
+
+            // Tenta pré-selecionar o melhor match lógico
+            const melhorMatch = encontrarMelhorMatch(row['Cliente'] || "", dadosCadastro);
+
+            dadosCadastro.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.Cliente;
+                opt.innerText = `${c.Cliente} (${c.Endereco || 'Sem endereço'})`;
+                if (c.Cliente === melhorMatch) {
+                    opt.selected = true;
+                }
+                select.appendChild(opt);
+            });
+
+            tdSelect.appendChild(select);
+            tr.appendChild(tdIndex);
+            tr.appendChild(tdNomeSemanal);
+            tr.appendChild(tdSelect);
+            corpo.appendChild(tr);
+        });
+
+        document.getElementById('conferenciaSection').style.display = "block";
+    }
+
+    function checarConforme(valor, min, max) {
+        const num = parseFloat(valor);
+        if (isNaN(num)) return "Conforme"; 
+        return (num >= min && num <= max) ? "Conforme" : "Fora do Padrão";
+    }
+
+    async function processarEGerarLaudos() {
+        const statusBox = document.getElementById('statusBox');
+        statusBox.className = "status success";
+        statusBox.innerText = "⏳ Cruzando dados e fabricando o pacote de PDFs...";
+
+        try {
+            const { jsPDF } = window.jspdf;
+            const zip = new JSZip();
+
+            dadosMedicoes.forEach((row, index) => {
+                // Captura qual cliente foi selecionado/sincronizado no dropdown para esta linha
+                const selectElement = document.getElementById(`select_cliente_${index}`);
+                const clienteSelecionado = selectElement ? selectElement.value : "";
+                
+                // Busca os dados completos deste cliente na tabela fixa
+                const infoCompleta = dadosCadastro.find(c => c.Cliente === clienteSelecionado) || {};
+
+                const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'letter' });
+                doc.setFont("helvetica", "normal");
+
+                // 1. Título do Cabeçalho
+                doc.setFontSize(14);
+                doc.setFont("helvetica", "bold");
+                doc.setTextColor(0, 131, 163); // Azul #0083A3
+                doc.text("RELATÓRIO E MONITORAMENTO DA QUALIDADE DA ÁGUA", 108, 20, { align: "center" });
+
+                // Tratamento de datas do carimbo
+                let dataColeta = "01/11/2026";
+                let horarioColeta = "15h06";
+                let dataProxima = "08/11/2026";
+                
+                if (row['Carimbo de data/hora']) {
+                    try {
+                        const partes = row['Carimbo de data/hora'].split(' ');
+                        if(partes[0]) {
+                            const d = partes[0].split('-');
+                            dataColeta = `${d[2]}/${d[1]}/${d[0]}`;
+                            
+                            const dataObj = new Date(d[0], d[1] - 1, d[2]);
+                            dataObj.setDate(dataObj.getDate() + 7);
+                            const diaProx = dataObj.getDate().toString().padStart(2, '0');
+                            const mesProx = (dataObj.getMonth() + 1).toString().padStart(2, '0');
+                            dataProxima = `${diaProx}/${mesProx}/${dataObj.getFullYear()}`;
+                        }
+                        if(partes[1]) horarioColeta = partes[1].substring(0,5).replace(':', 'h');
+                    } catch(err){}
+                }
+
+                // 2. Impressão Dinâmica dos Dados Completos (Sem digitação manual)
+                doc.setFontSize(10);
+                doc.setTextColor(51, 51, 51);
+                
+                doc.setFont("helvetica", "bold"); doc.text("Cliente:", 15, 34);
+                doc.setFont("helvetica", "normal"); doc.text(`Condomínio Residencial ${clienteSelecionado || row['Cliente']}`, 30, 34);
+                
+                doc.setFont("helvetica", "bold"); doc.text("Endereço:", 15, 40);
+                doc.setFont("helvetica", "normal"); doc.text(`${infoCompleta.Endereco || "Não informado no cadastro"}`, 34, 40);
+                
+                doc.setFont("helvetica", "bold"); doc.text("Telefone:", 15, 46);
+                doc.setFont("helvetica", "normal"); doc.text(`${infoCompleta.Telefone || "Não informado no cadastro"}`, 33, 46);
+                
+                doc.setFont("helvetica", "bold"); doc.text("Local da Coleta:", 15, 52);
+                doc.setFont("helvetica", "normal"); doc.text(`${infoCompleta.Local_Coleta || "Piscina Adulto"}`, 44, 52);
+                
+                doc.setFont("helvetica", "bold"); doc.text("Data / Hora:", 15, 58);
+                doc.setFont("helvetica", "normal"); doc.text(`${dataColeta} às ${horarioColeta}`, 37, 58);
+                
+                doc.setFont("helvetica", "bold"); doc.text("Responsável Técnico:", 15, 64);
+                doc.setFont("helvetica", "normal"); doc.text(`${infoCompleta.Responsavel_Tecnico || "Antonio Lucas Triburtino"}   CRQ: ${infoCompleta.CRQ || "xxx.xxx-xx"}`, 53, 64);
+
+                // 3. Desenho de Tabela de Resultados
+                doc.setFont("helvetica", "bold");
+                doc.setTextColor(0, 131, 163);
+                doc.text("RESULTADOS DA ANÁLISE", 15, 76);
+
+                doc.setFillColor(0, 131, 163);
+                doc.rect(15, 80, 185, 8, "F");
+                doc.setTextColor(255, 255, 255);
+                doc.text("Parâmetro", 18, 85.5);
+                doc.text("Resultados", 70, 85.5);
+                doc.text("Valor de Referência", 115, 85.5);
+                doc.text("Diagnóstico", 165, 85.5);
+
+                const params = [
+                    { name: "Cloro Livre", val: row['Cloro Livre'] || "0,0", ref: "1.0 – 3.0", diag: checarConforme(row['Cloro Livre'], 1.0, 3.0) },
+                    { name: "PH", val: row['PH'] || "0,0", ref: "7.4 – 7.8", diag: checarConforme(row['PH'], 7.4, 7.8) },
+                    { name: "Alcalinidade", val: row['Alcalinidade'] || "0", ref: "80 - 120", diag: checarConforme(row['Alcalinidade'], 80, 120) },
+                    { name: "Dureza Cálcica", val: row['Dureza Total'] || "0", ref: "200 - 400", diag: checarConforme(row['Dureza Total'], 200, 400) },
+                    { name: "Temperatura", val: "30", ref: "26 - 32", diag: "Conforme" },
+                    { name: "Aspecto Visual", val: row['Aspecto Visual'] || "Límpida", ref: "límpida", diag: "Conforme" }
+                ];
+
+                let currentY = 88;
+                doc.setFont("helvetica", "normal");
+                
+                params.forEach(p => {
+                    doc.setTextColor(51, 51, 51);
+                    doc.text(p.name, 18, currentY + 5);
+                    doc.text(p.val.toString(), 70, currentY + 5);
+                    doc.text(p.ref, 115, currentY + 5);
+                    doc.text(p.diag, 165, currentY + 5);
+                    
+                    doc.setDrawColor(224, 224, 224);
+                    doc.line(15, currentY + 8, 200, currentY + 8);
+                    currentY += 8;
+                });
+
+                // 4. Parecer e Status
+                currentY += 12;
+                doc.setFont("helvetica", "bold");
+                doc.setTextColor(0, 131, 163);
+                doc.text("AVALIAÇÃO TÉCNICA", 15, currentY);
+                
+                currentY += 6;
+                doc.setFont("helvetica", "normal");
+                doc.setTextColor(51, 51, 51);
+                const avaliacaoTxt = `A água analisada apresentou parâmetros dentro das faixas 
+                recomendadas para utilização recreativa, não sendo observadas irregularidades que 
+                comprometam a segurança ou o conforto dos usuários. Nota de campo: ${row['Avaliação Técnica'] || 'Dentro dos parâmetros'}.`;
+                const splitAvaliacao = doc.splitTextToSize(avaliacaoTxt, 185);
+                doc.text(splitAvaliacao, 15, currentY);
+
+                currentY += (splitAvaliacao.length * 5) + 6;
+                doc.setFont("helvetica", "bold");
+                doc.setTextColor(0, 131, 163);
+                doc.text("STATUS DA ÁGUA", 15, currentY);
+                
+                currentY += 6;
+                doc.setFont("helvetica", "normal");
+                doc.setTextColor(51, 51, 51);
+                doc.text("Piscina dentro dos padrões aceitos e água Própria para o uso.", 15, currentY);
+
+                currentY += 8;
+                doc.setFont("helvetica", "bold");
+                doc.text(`Data da próxima análise: ${dataProxima}`, 15, currentY);
+
+                // 5. Rodapé
+                doc.setFontSize(10);
+                doc.setFont("helvetica", "bold");
+                doc.setTextColor(0, 131, 163);
+                doc.text("________________ Acqua TEC Análises ________________", 108, 245, { align: "center" });
+
+                const pdfData = doc.output('arraybuffer');
+                const nomeLimpo = (clienteSelecionado || row['Cliente'] || `Condominio_${index+1}`).replace(/\s+/g, '_');
+                zip.file(`Laudo_Condominio_${nomeLimpo}.pdf`, pdfData);
+            });
+
+            const content = await zip.generateAsync({ type: "blob" });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(content);
+            link.download = `Pacote_Laudos_Sincronizados.zip`;
+            link.click();
+
+            statusBox.className = "status success";
+            statusBox.innerText = "✅ Sucesso! O arquivo '.zip' com todos os laudos corrigidos e sincronizados foi baixado.";
+
+        } catch (err) {
+            statusBox.className = "status error";
+            statusBox.innerText = "❌ Erro ao fabricar os laudos: " + err.message;
+        }
+    }
+</script>
+
+</body>
+</html>
